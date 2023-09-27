@@ -57,6 +57,7 @@ if not is_valid_data_dir(data_dir):
     sys.exit(1)
 
 description = args.description_pattern
+pattern = re.compile(f"^{description}$", re.IGNORECASE)
 if len(description) == 0:
     print("error: object description to match cannot be empty\n",
           file=sys.stderr)
@@ -68,7 +69,6 @@ object_files = list(Path(data_dir, "objects").glob("[0-9]*.txt"))
 for file in object_files:
     with open(file, "r") as FD:
         lines = FD.readlines()
-        pattern = re.compile(f"^{description}$", re.IGNORECASE)
 
         if pattern.match(lines[1]):
             as_id = lambda x: x.split("=")[1].strip()
