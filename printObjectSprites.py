@@ -18,8 +18,8 @@ parser = argparse.ArgumentParser(
     anchored with ^PATTERN$ for exact case matching.
   - To autoload sprites with GIMP, pipe at the end with: | xargs gimp
 
-  Example: {prog_path} '^turkey$'
-  Example with GIMP: {prog_path} '^turkey$' {default_data_dir} | xargs gimp
+  Example: {prog_path} 'turkey'
+  Example with GIMP: {prog_path} 'turkey' ./OneLifeData7 | xargs gimp
 
 """)
 

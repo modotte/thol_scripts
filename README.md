@@ -6,7 +6,7 @@ My personal collection of 2HOL related scripts.
 
 Print all relevant sprites of an object via its description.
 
-For more info, use `./printObjectSprites.py`.
+For more info, use `./printObjectSprites.py --help`.
 
 Examples:
 ```sh
