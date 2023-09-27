@@ -14,10 +14,9 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawTextHelpFormatter,
     epilog=f"""
   - If second argument is not provided, it will default to current directory.
-  - For convenience, the pattern matching is made case insensitive.
+  - For convenience, the pattern matching is made case insensitive and 
+    anchored with ^PATTERN$ for exact case matching.
   - To autoload sprites with GIMP, pipe at the end with: | xargs gimp
-  - Always remember to surround your pattern matching string with ^ and $ if you
-    want to find the exact match!
 
   Example: {prog_path} '^turkey$'
   Example with GIMP: {prog_path} '^turkey$' {default_data_dir} | xargs gimp
@@ -64,16 +63,17 @@ if len(description) == 0:
     parser.print_help()
     sys.exit(1)
 
-files = list(Path(data_dir, "objects").glob("[0-9]*.txt"))
+object_files = list(Path(data_dir, "objects").glob("[0-9]*.txt"))
 
-for file in files:
+for file in object_files:
     with open(file, "r") as FD:
         lines = FD.readlines()
-        pattern = re.compile(description, re.IGNORECASE)
+        pattern = re.compile(f"^{description}$", re.IGNORECASE)
 
         if pattern.match(lines[1]):
+            as_id = lambda x: x.split("=")[1].strip()
             sprite_ids = set(
-                [line for line in lines[1:] if "spriteID" in line])
+                [as_id(line) for line in lines[1:] if "spriteID" in line])
             for id in sprite_ids:
-                filename = id.split('=')[1].strip() + ".tga"
-                print(os.path.join(data_dir, "sprites", filename))
+                tga_filename = id + ".tga"
+                print(os.path.join(data_dir, "sprites", tga_filename))
