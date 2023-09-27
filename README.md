@@ -4,7 +4,7 @@ My personal collection of 2HOL related scripts.
 
 ## printObjectSprites.py
 
-Print all relevant sprites of an object via its name.
+Print all relevant sprites of an object via its description.
 
 For more info, use `./printObjectSprites.py`.
 
@@ -17,5 +17,5 @@ Examples:
 ./printObjectSprites.py '.*apple.*' ../OneLifeData7/ | sort | uniq | wc -l
 
 # get all sprites from object with description that starts with 'female' (eve)
-./printObjectSprites.py 'female' ../OneLifeData7/ | sort | uniq | wc -l
+./printObjectSprites.py 'female' ../OneLifeData7/ | sort | uniq
 ```
