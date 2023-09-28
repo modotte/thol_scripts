@@ -10,7 +10,7 @@ prog_path = sys.argv[0]
 
 default_data_dir = "."
 parser = argparse.ArgumentParser(
-    description='Print relevant 2HOL sprites from an object.',
+    description="Print relevant 2HOL sprites from an object.",
     formatter_class=argparse.RawTextHelpFormatter,
     epilog=f"""
   - If second argument is not provided, it will default to current directory.
@@ -32,6 +32,11 @@ parser.add_argument("data_dir",
                     default=default_data_dir,
                     nargs="?",
                     help="data directory path [defaults: . ]")
+parser.add_argument("-s", "--sorted", action="store_true", 
+                    help="list as sorted [defaults: disabled]")
+parser.add_argument("-v", "--version", action="version",
+                    version=f"{parser.prog} v0.2.0.0",
+                    help="print this script version")
 args = parser.parse_args()
 
 
@@ -66,9 +71,12 @@ if len(description) == 0:
 object_files = list(Path(data_dir, "objects").glob("[0-9]*.txt"))
 
 
-def get_sprite_ids(lines: list[str]) -> set[str]:
+def get_sprite_ids(as_sorted: bool, lines: list[str]) -> set[str]:
     as_id = lambda x: x.split("=")[1].strip()
-    return set([as_id(line) for line in lines[1:] if "spriteID" in line])
+    ids = set([as_id(line) for line in lines[1:] if "spriteID" in line])
+
+    if as_sorted: return sorted(ids)
+    return ids
 
 
 def print_tga_filepaths(sprite_ids: set[str], target_dir: str):
@@ -85,4 +93,4 @@ for file in object_files:
         description = lines[1]
 
         if pattern.match(description):
-            print_tga_filepaths(get_sprite_ids(lines), data_dir)
+            print_tga_filepaths(get_sprite_ids(args.sorted, lines), data_dir)
