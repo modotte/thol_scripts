@@ -8,10 +8,16 @@ set -ef -o  pipefail
 REQUIRED_TOOLS=("jq" "curl" "awk")
 all_tools_exists=1
 for i in "${REQUIRED_TOOLS[@]}"; do
-    test ! "$(command -v "${i}")" && >&2 echo "You are missing the ${i} tool!" && all_tools_exists=0
+    if [[ ! "$(command -v "${i}")" ]]; then
+        >&2 echo "You are missing the ${i} tool!"
+        all_tools_exists=0
+    fi
 done
-test "${all_tools_exists}" -eq 0 && >&2 echo "All the tools above need to be installed to run this script. Aborted." \
-    && exit 1
+
+if [[ "${all_tools_exists}" -eq 0 ]]; then
+    >&2 echo "All the tools above need to be installed to run this script. Aborted."
+    exit 1
+fi
 
 # TARGET can be either git branches, tags or commit hash.
 
@@ -21,7 +27,9 @@ if [[ -z "${TARGET}" ]]; then
     TARGET="master"
 fi
 
-curl -sSf -o - "https://api.github.com/repos/twohoursonelife/OneLifeData7/git/trees/${TARGET}?recursive=1" \
+API_URL="https://api.github.com/repos/twohoursonelife/OneLifeData7/git/trees/${TARGET}?recursive=1"
+
+curl -sSf -o - "${API_URL}" \
     | jq -rc '.tree
               | .[]
               | .path
