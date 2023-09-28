@@ -5,6 +5,7 @@ import re
 import os
 from pathlib import Path
 import argparse
+import itertools
 
 prog_path = sys.argv[0]
 
@@ -71,26 +72,31 @@ if len(description) == 0:
 object_files = list(Path(data_dir, "objects").glob("[0-9]*.txt"))
 
 
-def get_sprite_ids(as_sorted: bool, lines: list[str]) -> set[str]:
-    as_id = lambda x: x.split("=")[1].strip()
-    ids = set([as_id(line) for line in lines[1:] if "spriteID" in line])
+def get_sprite_ids(lines: list[str]) -> list[int]:
+    as_id = lambda x: int(x.split("=")[1].strip())
+    ids = list([as_id(line) for line in lines[1:] if "spriteID" in line])
 
-    if as_sorted: return sorted(ids)
     return ids
 
 
-def print_tga_filepaths(sprite_ids: set[str], target_dir: str):
+def print_tga_filepaths(sprite_ids: set[int]|list[int], target_dir: str):
     for idx in sprite_ids:
-        tga_filename = idx + ".tga"
+        tga_filename = str(idx) + ".tga"
         filepath = os.path.join(target_dir, "sprites", tga_filename)
 
         print(filepath)
 
-
+all_raw_ids: list[list[int]]  = []
 for file in object_files:
     with open(file, "r") as FD:
         lines = FD.readlines()
         description = lines[1]
 
         if pattern.match(description):
-            print_tga_filepaths(get_sprite_ids(args.sorted, lines), data_dir)
+            all_raw_ids.append(get_sprite_ids(lines))
+
+sprite_ids: set[int] = set(itertools.chain.from_iterable(all_raw_ids))
+
+if args.sorted: sprite_ids = sorted(sprite_ids)
+
+print_tga_filepaths(sprite_ids, data_dir)
