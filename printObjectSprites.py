@@ -35,19 +35,18 @@ parser.add_argument("data_dir",
 args = parser.parse_args()
 
 
-def is_valid_data_dir(path):
-    sprites_dir = os.path.join(path, "sprites")
-    objects_dir = os.path.join(path, "objects")
-
-    return os.path.isdir(sprites_dir) and os.path.isdir(objects_dir)
-
-
 data_dir = args.data_dir
 
 if not os.path.isdir(data_dir):
     print(f"error: {data_dir} is not a valid directory\n", file=sys.stderr)
     parser.print_help()
     sys.exit(1)
+
+def is_valid_data_dir(path: str) -> bool:
+    sprites_dir = os.path.join(path, "sprites")
+    objects_dir = os.path.join(path, "objects")
+
+    return os.path.isdir(sprites_dir) and os.path.isdir(objects_dir)
 
 if not is_valid_data_dir(data_dir):
     print(
@@ -66,14 +65,24 @@ if len(description) == 0:
 
 object_files = list(Path(data_dir, "objects").glob("[0-9]*.txt"))
 
+
+def get_sprite_ids(lines: list[str]) -> set[str]:
+    as_id = lambda x: x.split("=")[1].strip()
+    return set([as_id(line) for line in lines[1:] if "spriteID" in line])
+
+
+def print_tga_filepaths(sprite_ids: set[str], target_dir: str):
+    for idx in sprite_ids:
+        tga_filename = idx + ".tga"
+        filepath = os.path.join(target_dir, "sprites", tga_filename)
+
+        print(filepath)
+
+
 for file in object_files:
     with open(file, "r") as FD:
         lines = FD.readlines()
+        description = lines[1]
 
-        if pattern.match(lines[1]):
-            as_id = lambda x: x.split("=")[1].strip()
-            sprite_ids = set(
-                [as_id(line) for line in lines[1:] if "spriteID" in line])
-            for id in sprite_ids:
-                tga_filename = id + ".tga"
-                print(os.path.join(data_dir, "sprites", tga_filename))
+        if pattern.match(description):
+            print_tga_filepaths(get_sprite_ids(lines), data_dir)
