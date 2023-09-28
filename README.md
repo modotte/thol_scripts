@@ -17,7 +17,7 @@ Examples:
 ./printObjectSprites.py '.*apple.*' ../OneLifeData7/ | wc -l
 
 # get all sprites from object with description that starts with 'female' (eve)
-./printObjectSprites.py --sorted 'female.*' ../OneLifeData7/
+./printObjectSprites.py --sorted 'female.*' ../OneLifeData7/ | uniq
 ```
 
 ## printRemoteObjectFiles.sh
