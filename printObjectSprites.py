@@ -36,8 +36,10 @@ parser.add_argument("data_dir",
                     help="data directory path [defaults: . ]")
 parser.add_argument("-s", "--sorted", action="store_true", 
                     help="list as sorted [defaults: disabled]")
+parser.add_argument("-n", "--name", action="store_true", 
+                    help="list with name of sprite in format of: NAME SPRITEID")
 parser.add_argument("-v", "--version", action="version",
-                    version=f"{parser.prog} v0.2.0.0",
+                    version=f"{parser.prog} v0.3.0.0",
                     help="print this script version")
 args = parser.parse_args()
 
@@ -50,8 +52,8 @@ if not path.isdir(data_dir):
     sys.exit(1)
 
 sprites_dir = path.join(data_dir, "sprites")
-objects_dir = path.join(data_dir, "objects")
 def is_valid_data_dir(data_dir: str) -> bool:
+    objects_dir = path.join(data_dir, "objects")
     return path.isdir(sprites_dir) and path.isdir(objects_dir)
 
 if not is_valid_data_dir(data_dir):
@@ -69,14 +71,18 @@ if len(description) == 0:
     parser.print_help()
     sys.exit(1)
 
-object_files = list(pathlib.Path(data_dir, "objects").glob("[0-9]*.txt"))
-
-def as_sprite_id(s: str) -> int: return int(s.split("=")[1].strip())
+def as_sprite_id(s: str) -> str: return s.split("=")[1].strip()
 
 def get_sprite_ids(lines: list[str]) -> list[int]:
-    ids = list([as_sprite_id(line) for line in lines[1:] if "spriteID" in line])
+    ids = list([int(as_sprite_id(line)) for line in lines[1:] if "spriteID" in line])
 
     return ids
+
+def get_sprite_name(sprite_id: str) -> str:
+    sprite_txt_filepath = path.join(sprites_dir, sprite_id + ".txt")
+    with open(sprite_txt_filepath, "r") as FD: 
+        name = FD.readline().split()[0]
+        return name
 
 def print_tga_filepaths(sprite_ids: set[int]|list[int], target_dir: str):
     for idx in sprite_ids:
@@ -86,8 +92,9 @@ def print_tga_filepaths(sprite_ids: set[int]|list[int], target_dir: str):
         print(filepath)
 
 all_raw_ids: list[list[int]]  = []
-for file in object_files:
-    with open(file, "r") as FD:
+object_files = list(pathlib.Path(data_dir, "objects").glob("[0-9]*.txt"))
+for object_file in object_files:
+    with open(object_file, "r") as FD:
         lines = FD.readlines()
         description = lines[1]
 
