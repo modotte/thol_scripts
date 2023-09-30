@@ -71,25 +71,29 @@ if len(description) == 0:
     parser.print_help()
     sys.exit(1)
 
-def as_sprite_id(s: str) -> str: return s.split("=")[1].strip()
+def as_sprite_id(s: str) -> int: return int(s.split("=")[1].strip())
 
 def get_sprite_ids(lines: list[str]) -> list[int]:
-    ids = list([int(as_sprite_id(line)) for line in lines[1:] if "spriteID" in line])
+    ids = list([as_sprite_id(line) for line in lines[1:] if "spriteID" in line])
 
     return ids
 
-def get_sprite_name(sprite_id: str) -> str:
-    sprite_txt_filepath = path.join(sprites_dir, sprite_id + ".txt")
+def get_sprite_name(sprite_id: int) -> str:
+    sprite_txt_filepath = path.join(sprites_dir, str(sprite_id) + ".txt")
     with open(sprite_txt_filepath, "r") as FD: 
         name = FD.readline().split()[0]
         return name
 
-def print_tga_filepaths(sprite_ids: set[int]|list[int], target_dir: str):
+def print_sprites_info(with_name: bool, sprite_ids: set[int] | list[int], target_dir: str):
     for idx in sprite_ids:
         tga_filename = str(idx) + ".tga"
         filepath = os.path.join(target_dir, "sprites", tga_filename)
 
-        print(filepath)
+        if with_name:
+            name = get_sprite_name(idx)
+            print(f"{name} {filepath}")
+        else:
+            print(filepath)
 
 all_raw_ids: list[list[int]]  = []
 object_files = list(pathlib.Path(data_dir, "objects").glob("[0-9]*.txt"))
@@ -105,4 +109,4 @@ sprite_ids: set[int] | list[int] = set(itertools.chain.from_iterable(all_raw_ids
 
 if args.sorted: sprite_ids = sorted(sprite_ids)
 
-print_tga_filepaths(sprite_ids, data_dir)
+print_sprites_info(args.name, sprite_ids, data_dir)
