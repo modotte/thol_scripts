@@ -3,7 +3,8 @@
 import sys
 import re
 import os
-from pathlib import Path
+import os.path as path
+import pathlib
 import argparse
 import itertools
 
@@ -43,16 +44,15 @@ args = parser.parse_args()
 
 data_dir = args.data_dir
 
-if not os.path.isdir(data_dir):
+if not path.isdir(data_dir):
     print(f"error: {data_dir} is not a valid directory\n", file=sys.stderr)
     parser.print_help()
     sys.exit(1)
 
-def is_valid_data_dir(path: str) -> bool:
-    sprites_dir = os.path.join(path, "sprites")
-    objects_dir = os.path.join(path, "objects")
-
-    return os.path.isdir(sprites_dir) and os.path.isdir(objects_dir)
+sprites_dir = path.join(data_dir, "sprites")
+objects_dir = path.join(data_dir, "objects")
+def is_valid_data_dir(data_dir: str) -> bool:
+    return path.isdir(sprites_dir) and path.isdir(objects_dir)
 
 if not is_valid_data_dir(data_dir):
     print(
@@ -69,15 +69,14 @@ if len(description) == 0:
     parser.print_help()
     sys.exit(1)
 
-object_files = list(Path(data_dir, "objects").glob("[0-9]*.txt"))
+object_files = list(pathlib.Path(data_dir, "objects").glob("[0-9]*.txt"))
 
+def as_sprite_id(s: str) -> int: return int(s.split("=")[1].strip())
 
 def get_sprite_ids(lines: list[str]) -> list[int]:
-    as_id = lambda x: int(x.split("=")[1].strip())
-    ids = list([as_id(line) for line in lines[1:] if "spriteID" in line])
+    ids = list([as_sprite_id(line) for line in lines[1:] if "spriteID" in line])
 
     return ids
-
 
 def print_tga_filepaths(sprite_ids: set[int]|list[int], target_dir: str):
     for idx in sprite_ids:
@@ -95,7 +94,7 @@ for file in object_files:
         if pattern.match(description):
             all_raw_ids.append(get_sprite_ids(lines))
 
-sprite_ids: set[int] = set(itertools.chain.from_iterable(all_raw_ids))
+sprite_ids: set[int] | list[int] = set(itertools.chain.from_iterable(all_raw_ids))
 
 if args.sorted: sprite_ids = sorted(sprite_ids)
 
