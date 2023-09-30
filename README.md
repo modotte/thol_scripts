@@ -1,6 +1,7 @@
 # thol_scripts
 
-My personal collection of 2HOL related scripts.
+My personal collection of 2HOL related scripts. Some scripts goes into their own directories.
+View CHANGELOG.MD in them to see what changed.
 
 ## printObjectSprites.py
 
